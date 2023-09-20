@@ -1,22 +1,33 @@
 import { Address, Enrollment } from '@prisma/client';
 import { request } from '@/utils/request';
-import { invalidDataError, notFoundError } from '@/errors';
+import { enrollmentNotFoundError, invalidCepError } from '@/errors';
 import { addressRepository, CreateAddressParams, enrollmentRepository, CreateEnrollmentParams } from '@/repositories';
 import { exclude } from '@/utils/prisma-utils';
+import { AddressEnrollment } from '@/protocols';
 
-async function getAddressFromCEP(cep:string) {
+async function getAddressFromCEP(cep: string): Promise<AddressEnrollment> {
   const result = await request.get(`${process.env.VIA_CEP_API}/${cep}/json/`);
 
-  if(result.data.erro) throw invalidDataError("Cep inexistente")
-  const data = result.data
+  if (!result.data || result.data.erro) {
+    throw invalidCepError();
+  }
 
-  return {logradouro:data.logradouro,complemento:data.complemento,bairro:data.bairro,cidade:data.localidade,uf:data.uf};
+  const { bairro, localidade, uf, complemento, logradouro } = result.data;
+  const address: AddressEnrollment = {
+    bairro,
+    cidade: localidade,
+    uf,
+    complemento,
+    logradouro,
+  };
+
+  return address;
 }
 
 async function getOneWithAddressByUserId(userId: number): Promise<GetOneWithAddressByUserIdResult> {
   const enrollmentWithAddress = await enrollmentRepository.findWithAddressByUserId(userId);
 
-  if (!enrollmentWithAddress) throw invalidDataError("No enrollments");
+  if (!enrollmentWithAddress) throw enrollmentNotFoundError();
 
   const [firstAddress] = enrollmentWithAddress.Address;
   const address = getFirstAddress(firstAddress);
@@ -42,7 +53,7 @@ async function createOrUpdateEnrollmentWithAddress(params: CreateOrUpdateEnrollm
   enrollment.birthday = new Date(enrollment.birthday);
   const address = getAddressForUpsert(params.address);
 
-  await getAddressFromCEP(address.cep)
+  await getAddressFromCEP(address.cep);
 
   const newEnrollment = await enrollmentRepository.upsert(params.userId, enrollment, exclude(enrollment, 'userId'));
 
