@@ -15,7 +15,16 @@ async function getTicket(userId: number) {
   return result;
 }
 
+async function postTicket(userId: number, typeId: number) {
+  const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
+  if (enrollment === null) throw notFoundError();
+  const result = await ticketsRepository.postTicket(userId, typeId, enrollment.id);
+
+  return result;
+}
+
 export const ticketsService = {
   getTicketType,
   getTicket,
+  postTicket,
 };
