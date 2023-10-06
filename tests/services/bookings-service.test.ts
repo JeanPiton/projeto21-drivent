@@ -3,6 +3,38 @@ import { bookingsService } from "@/services";
 import { bookingsRepository, enrollmentRepository, ticketsRepository } from "@/repositories";
 import { TicketStatus } from "@prisma/client";
 
+describe("getBooking",()=>{
+    it("should return with the booking",async ()=>{
+        jest.spyOn(bookingsRepository,"getBooking").mockImplementationOnce(():any=>{
+            return {
+                id:faker.datatype.number(),
+                Room:{
+                    id:faker.datatype.number(),
+                    name:faker.animal.insect(),
+                    capacity:faker.datatype.number(),
+                    hotelId:faker.datatype.number(),
+                }
+            }
+        })
+        const result = await bookingsService.getBooking(faker.datatype.number())
+        expect(result).toEqual({
+            id:expect.any(Number),
+            Room:{
+                id:expect.any(Number),
+                name:expect.any(String),
+                capacity:expect.any(Number),
+                hotelId:expect.any(Number)
+            }
+        })
+    });
+
+    it("should return not found error when no booking found",async()=>{
+        jest.spyOn(bookingsRepository,"getBooking").mockImplementationOnce(():any=>{return undefined});
+        const result = bookingsService.getBooking(faker.datatype.number())
+        expect(result).rejects.toEqual({name:"NotFoundError",message:"No result for this search!"})
+    })
+})
+
 describe("createBooking",()=>{
     it("Should return with the booking id",async ()=>{
         jest.spyOn(enrollmentRepository,"findWithAddressByUserId").mockImplementation(():any=>{return{id:faker.datatype.number()}})

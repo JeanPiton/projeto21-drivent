@@ -21,8 +21,18 @@ async function createBooking(userId:number,roomId:number) {
     })
 }
 
+async function getBooking(userId:number){
+    return prisma.booking.findFirst({
+        where:{
+            userId:userId
+        },
+        select:{id:true,Room:true}
+    })
+}
+
 export const bookingsRepository = {
     getRoomById,
     getReservationsByRoomId,
     createBooking,
+    getBooking,
 }

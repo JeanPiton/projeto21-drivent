@@ -2,6 +2,12 @@ import { forbiddenError, notFoundError } from "@/errors";
 import { bookingsRepository, enrollmentRepository, ticketsRepository } from "@/repositories";
 import { TicketStatus } from "@prisma/client";
 
+async function getBooking(userId:number) {
+    const booking = await bookingsRepository.getBooking(userId);
+    if(!booking) throw notFoundError();
+    return booking
+}
+
 async function createBooking(userId:number,roomId:number) {
     const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
     if (!enrollment) throw forbiddenError("Enrollment");
@@ -27,4 +33,5 @@ async function createBooking(userId:number,roomId:number) {
 
 export const bookingsService = {
     createBooking,
+    getBooking,
 }
