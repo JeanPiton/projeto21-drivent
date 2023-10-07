@@ -167,3 +167,67 @@ describe("createBooking",()=>{
         expect(result).rejects.toEqual({name: 'ForbiddenError',message: 'This room is Invalid or Unavailable'})
     })
 })
+
+describe("changeBooking",()=>{
+    it("should return booking id",async()=>{
+        jest.spyOn(bookingsRepository,"getBooking").mockImplementationOnce(():any=>{
+            return {
+            id:faker.datatype.number(),
+            Room:{id:faker.datatype.number()}
+        }})
+        jest.spyOn(bookingsRepository,"getRoomById").mockImplementationOnce(():any=>{
+            return {
+                id:faker.datatype.number(),
+                capacity:4
+            }
+        })
+        jest.spyOn(bookingsRepository,"getReservationsByRoomId").mockImplementationOnce(():any=>{
+            return 2
+        })
+        jest.spyOn(bookingsRepository,"changeBooking").mockImplementationOnce(():any=>{
+            return {id:faker.datatype.number()}
+        })
+        const userId = faker.datatype.number(), roomId = faker.datatype.number()
+        const result = await bookingsService.changeBooking(userId,roomId)
+        expect(result).toEqual({bookingId:expect.any(Number)})
+    })
+
+    it("should return forbidden error when user dont have booking",()=>{
+        jest.spyOn(bookingsRepository,"getBooking").mockImplementationOnce(()=>{return undefined})
+        const userId = faker.datatype.number(), roomId = faker.datatype.number()
+        const result = bookingsService.changeBooking(userId,roomId)
+        expect(result).rejects.toEqual({name:"ForbiddenError",message:"User booking is Invalid or Unavailable"})
+    })
+
+    it("should return not found error when room does not exist",()=>{
+        jest.spyOn(bookingsRepository,"getBooking").mockImplementationOnce(():any=>{
+            return {
+            id:faker.datatype.number(),
+            Room:{id:faker.datatype.number()}
+        }})
+        jest.spyOn(bookingsRepository,"getRoomById").mockImplementationOnce(()=>{return undefined})
+        const userId = faker.datatype.number(), roomId = faker.datatype.number()
+        const result = bookingsService.changeBooking(userId,roomId)
+        expect(result).rejects.toEqual({name:"NotFoundError",message:"No result for this search!"})
+    })
+
+    it("should return forbidden error when room is full",()=>{
+        jest.spyOn(bookingsRepository,"getBooking").mockImplementationOnce(():any=>{
+            return {
+            id:faker.datatype.number(),
+            Room:{id:faker.datatype.number()}
+        }})
+        jest.spyOn(bookingsRepository,"getRoomById").mockImplementationOnce(():any=>{
+            return {
+                id:faker.datatype.number(),
+                capacity:4
+            }
+        })
+        jest.spyOn(bookingsRepository,"getReservationsByRoomId").mockImplementationOnce(():any=>{
+            return 4
+        })
+        const userId = faker.datatype.number(), roomId = faker.datatype.number()
+        const result = bookingsService.changeBooking(userId,roomId)
+        expect(result).rejects.toEqual({name:"ForbiddenError",message:"This room is Invalid or Unavailable"})
+    })
+})

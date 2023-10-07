@@ -31,7 +31,19 @@ async function createBooking(userId:number,roomId:number) {
     return {bookingId:booking.id}
 }
 
+async function changeBooking(userId:number,roomId:number){
+    const booking = await bookingsRepository.getBooking(userId)
+    if(!booking) throw forbiddenError("User booking")
+    const room = await bookingsRepository.getRoomById(roomId)
+    if(!room) throw notFoundError()
+    const reservedInRoom = await bookingsRepository.getReservationsByRoomId(roomId)
+    if(room.capacity === reservedInRoom) throw forbiddenError("This room")
+    const newBooking = await bookingsRepository.changeBooking(userId,roomId)
+    return {bookingId:newBooking.id}
+}
+
 export const bookingsService = {
     createBooking,
     getBooking,
+    changeBooking,
 }
