@@ -21,10 +21,11 @@ async function createBooking(userId:number,roomId:number) {
     })
 }
 
-async function getBooking(userId:number){
+async function getBooking(userId:number,bookingId?:number|undefined){
     return prisma.booking.findFirst({
         where:{
-            userId:userId
+            userId:userId,
+            id:bookingId
         },
         select:{id:true,Room:true}
     })

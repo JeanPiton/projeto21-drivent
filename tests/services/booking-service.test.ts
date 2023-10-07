@@ -187,15 +187,15 @@ describe("changeBooking",()=>{
         jest.spyOn(bookingsRepository,"changeBooking").mockImplementationOnce(():any=>{
             return {id:faker.datatype.number()}
         })
-        const userId = faker.datatype.number(), roomId = faker.datatype.number()
-        const result = await bookingsService.changeBooking(userId,roomId)
+        const userId = faker.datatype.number(), roomId = faker.datatype.number(), bookingId = faker.datatype.number()
+        const result = await bookingsService.changeBooking(userId,roomId,bookingId)
         expect(result).toEqual({bookingId:expect.any(Number)})
     })
 
     it("should return forbidden error when user dont have booking",()=>{
         jest.spyOn(bookingsRepository,"getBooking").mockImplementationOnce(()=>{return undefined})
-        const userId = faker.datatype.number(), roomId = faker.datatype.number()
-        const result = bookingsService.changeBooking(userId,roomId)
+        const userId = faker.datatype.number(), roomId = faker.datatype.number(), bookingId = faker.datatype.number()
+        const result = bookingsService.changeBooking(userId,roomId,bookingId)
         expect(result).rejects.toEqual({name:"ForbiddenError",message:"User booking is Invalid or Unavailable"})
     })
 
@@ -206,8 +206,8 @@ describe("changeBooking",()=>{
             Room:{id:faker.datatype.number()}
         }})
         jest.spyOn(bookingsRepository,"getRoomById").mockImplementationOnce(()=>{return undefined})
-        const userId = faker.datatype.number(), roomId = faker.datatype.number()
-        const result = bookingsService.changeBooking(userId,roomId)
+        const userId = faker.datatype.number(), roomId = faker.datatype.number(), bookingId = faker.datatype.number()
+        const result = bookingsService.changeBooking(userId,roomId,bookingId)
         expect(result).rejects.toEqual({name:"NotFoundError",message:"No result for this search!"})
     })
 
@@ -226,8 +226,8 @@ describe("changeBooking",()=>{
         jest.spyOn(bookingsRepository,"getReservationsByRoomId").mockImplementationOnce(():any=>{
             return 4
         })
-        const userId = faker.datatype.number(), roomId = faker.datatype.number()
-        const result = bookingsService.changeBooking(userId,roomId)
+        const userId = faker.datatype.number(), roomId = faker.datatype.number(), bookingId = faker.datatype.number()
+        const result = bookingsService.changeBooking(userId,roomId,bookingId)
         expect(result).rejects.toEqual({name:"ForbiddenError",message:"This room is Invalid or Unavailable"})
     })
 })

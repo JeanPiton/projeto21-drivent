@@ -31,8 +31,8 @@ async function createBooking(userId:number,roomId:number) {
     return {bookingId:booking.id}
 }
 
-async function changeBooking(userId:number,roomId:number){
-    const booking = await bookingsRepository.getBooking(userId)
+async function changeBooking(userId:number,roomId:number,bookingId:number){
+    const booking = await bookingsRepository.getBooking(userId,bookingId)
     if(!booking) throw forbiddenError("User booking")
     const room = await bookingsRepository.getRoomById(roomId)
     if(!room) throw notFoundError()

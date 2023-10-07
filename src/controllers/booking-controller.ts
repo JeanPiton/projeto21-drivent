@@ -21,7 +21,8 @@ export async function createBooking(req:AuthenticatedRequest,res:Response) {
 export async function changeBooking(req:AuthenticatedRequest,res:Response) {
     const {userId} = req
     const {roomId} = req.body
+    const {bookingId} = req.params
 
-    const bookingId = await bookingsService.changeBooking(userId,roomId)
-    res.status(httpStatus.OK).send(bookingId)
+    const newBookingId = await bookingsService.changeBooking(userId,roomId,parseInt(bookingId))
+    res.status(httpStatus.OK).send(newBookingId)
 }
